@@ -12,6 +12,8 @@ import (
 var (
   username = flag.String("username", "", "api username")
   password = flag.String("password", "", "api password")
+  appName = flag.String("app", "", "app")
+  repo = flag.String("archive", "", "archive url")
 )
 
 func main() {
@@ -23,32 +25,25 @@ func main() {
 
   h := heroku.NewService(heroku.DefaultClient)
 
-  a := "testing-build-api"
-  u := "https://github.com/heroku/node-js-sample/archive/master.tar.gz"
-  v := "foo"
-
-  s := struct {
-    URL     *string `json:"url,omitempty"`
-    Version *string `json:"version,omitempty"`
-  }{
-    &u,
-    &v,
-  }
-
-  build, err := h.BuildCreate(a, heroku.BuildCreateOpts{
-    &s,
+  build, err := h.BuildCreate(*appName, heroku.BuildCreateOpts{
+    SourceBlob: &struct {
+      URL     *string `json:"url,omitempty"`
+      Version *string `json:"version,omitempty"`
+    }{
+      URL:     heroku.String(*repo),
+    },
   })
   if err != nil {
     log.Fatal(err)
   }
 
   for build.Status == "pending" {
-    build, err = h.BuildInfo(a, build.ID)
+    build, err = h.BuildInfo(*appName, build.ID)
     fmt.Print(".")
     time.Sleep(time.Second)
   }
 
-  r, err := h.BuildResultInfo(a, build.ID)
+  r, err := h.BuildResultInfo(*appName, build.ID)
   if err != nil {
     log.Fatal(err)
   }
@@ -56,6 +51,4 @@ func main() {
   for _, line := range r.Lines {
     fmt.Println(line.Line)
   }
-
-  fmt.Print(r.Build.ID)
 }
