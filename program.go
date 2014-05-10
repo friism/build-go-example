@@ -10,8 +10,7 @@ import (
 )
 
 var (
-  username = flag.String("username", "", "api username")
-  password = flag.String("password", "", "api password")
+  password = flag.String("apikey", "", "api key")
   appName = flag.String("app", "", "app")
   repo = flag.String("archive", "", "archive url")
 )
@@ -20,7 +19,6 @@ func main() {
   log.SetFlags(0)
   flag.Parse()
 
-  heroku.DefaultTransport.Username = *username
   heroku.DefaultTransport.Password = *password
 
   h := heroku.NewService(heroku.DefaultClient)
@@ -49,6 +47,6 @@ func main() {
   }
 
   for _, line := range r.Lines {
-    fmt.Println(line.Line)
+    fmt.Print(line.Line)
   }
 }
