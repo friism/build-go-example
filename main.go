@@ -1,52 +1,52 @@
 package main
 
 import (
-  "flag"
-  "fmt"
-  "log"
-  "time"
+	"flag"
+	"fmt"
+	"log"
+	"time"
 
-  "github.com/cyberdelia/heroku-go/v3"
+	"github.com/cyberdelia/heroku-go/v3"
 )
 
 var (
-  password = flag.String("apikey", "", "api key")
-  appName = flag.String("app", "", "app")
-  repo = flag.String("archive", "", "archive url")
+	password = flag.String("apikey", "", "api key")
+	appName  = flag.String("app", "", "app")
+	repo     = flag.String("archive", "", "archive url")
 )
 
 func main() {
-  log.SetFlags(0)
-  flag.Parse()
+	log.SetFlags(0)
+	flag.Parse()
 
-  heroku.DefaultTransport.Password = *password
+	heroku.DefaultTransport.Password = *password
 
-  h := heroku.NewService(heroku.DefaultClient)
+	h := heroku.NewService(heroku.DefaultClient)
 
-  build, err := h.BuildCreate(*appName, heroku.BuildCreateOpts{
-    SourceBlob: &struct {
-      URL     *string `json:"url,omitempty"`
-      Version *string `json:"version,omitempty"`
-    }{
-      URL:     heroku.String(*repo),
-    },
-  })
-  if err != nil {
-    log.Fatal(err)
-  }
+	build, err := h.BuildCreate(*appName, heroku.BuildCreateOpts{
+		SourceBlob: &struct {
+			URL     *string `json:"url,omitempty"`
+			Version *string `json:"version,omitempty"`
+		}{
+			URL: heroku.String(*repo),
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  for build.Status == "pending" {
-    build, err = h.BuildInfo(*appName, build.ID)
-    fmt.Print(".")
-    time.Sleep(time.Second)
-  }
+	for build.Status == "pending" {
+		build, err = h.BuildInfo(*appName, build.ID)
+		fmt.Print(".")
+		time.Sleep(time.Second)
+	}
 
-  r, err := h.BuildResultInfo(*appName, build.ID)
-  if err != nil {
-    log.Fatal(err)
-  }
+	r, err := h.BuildResultInfo(*appName, build.ID)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  for _, line := range r.Lines {
-    fmt.Print(line.Line)
-  }
+	for _, line := range r.Lines {
+		fmt.Print(line.Line)
+	}
 }
