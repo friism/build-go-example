@@ -5,6 +5,7 @@ How to use:
 ```term
 $ git clone git@github.com:heroku/buildapi-go-example.git
 ...
+$ go get
 $ go build build.go
 $ heroku create
 Creating limitless-fjord-5604... done, stack is cedar
